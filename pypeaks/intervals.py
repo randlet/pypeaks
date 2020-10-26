@@ -1,5 +1,6 @@
 import numpy as np
-from slope import find_nearest_index
+
+from pypeaks.slope import find_nearest_index
 
 
 class Intervals:
@@ -22,7 +23,7 @@ class Intervals:
 
     def next_interval(self, interval):
         """
-        Given a value of an interval, this function returns the 
+        Given a value of an interval, this function returns the
         next interval value
         """
         index = np.where(self.intervals == interval)
@@ -42,4 +43,3 @@ class Intervals:
 
         index = find_nearest_index(self.intervals, interval)
         return self.intervals[index]
-

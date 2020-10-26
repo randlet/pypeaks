@@ -1,11 +1,10 @@
-from __future__ import division
 import pickle
 from warnings import warn
 
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
-import slope
+from pypeaks import slope
 
 
 class Data:
@@ -77,27 +76,27 @@ class Data:
         method can be interval/slope/hybrid.
             The interval-based method simply steps through the whole histogram
             and pick up the local maxima in each interval, from which irrelevant
-            peaks are filtered out by looking at the proportion of points on 
+            peaks are filtered out by looking at the proportion of points on
             either side of the detected peak in each interval, and by applying
             peal_amp_thresh and valley_thresh bounds.
-        
-            Slope approach uses, of course slope information, to find peaks, 
-            which are then filtered by applying peal_amp_thresh and 
-            valley_thresh bounds. 
-            
+
+            Slope approach uses, of course slope information, to find peaks,
+            which are then filtered by applying peal_amp_thresh and
+            valley_thresh bounds.
+
             Hybrid approach combines the peaks obtained using slope method and
             interval-based approach. It retains the peaks/valleys from slope method
             if there should be a peak around the same region from each of the methods.
-        
+
         peak_amp_thresh is the minimum amplitude/height that a peak should have
-        in a normalized smoothed histogram, to be qualified as a peak. 
+        in a normalized smoothed histogram, to be qualified as a peak.
         valley_thresh is viceversa for valleys!
 
         If the method is interval/hybrid, then the intervals argument must be passed
         and it should be an instance of Intervals class.
 
         If the method is slope/hybrid, then the lookahead and avg_window
-        arguments should be changed based on the application. 
+        arguments should be changed based on the application.
         They have some default values though.
 
         The method stores peaks in self.peaks in the following format:
@@ -120,7 +119,7 @@ class Data:
             peak_data = result["peaks"]
             valley_data = result["valleys"]
 
-            for i in xrange(len(peak_data[0])):
+            for i in range(len(peak_data[0])):
                 nearest_index = slope.find_nearest_index(valley_data[0],
                                                          peak_data[0][i])
                 if valley_data[0][nearest_index] < peak_data[0][i]:
@@ -167,11 +166,11 @@ class Data:
             if first_center < intervals.intervals[0]:
                 first_center = intervals.intervals[0]
                 warn("In the interval based approach, the first center was seen\
-                    to be too low and is set to " + str(first_center))
+                    to be too low and is set to "                                                                                                                                                                                                                                                      + str(first_center))
             if last_center > intervals.intervals[-1]:
                 last_center = intervals.intervals[-1]
                 warn("In the interval based approach, the last center was seen\
-                     to be too high and is set to " + str(last_center))
+                     to be too high and is set to "                                                                                                                                                                                                                                                                + str(last_center))
 
             #step 2: find the peak position, and set the left and right bounds
             # which are equivalent in sense to the valley points
@@ -196,8 +195,8 @@ class Data:
         # If its is a hybrid method merge the results. If we find same
         # peak position in both results, we prefer valleys of slope-based peaks
         if method == "hybrid":
-            p1 = slope_peaks.keys()
-            p2 = interval_peaks.keys()
+            p1 = list(slope_peaks.keys())
+            p2 = list(interval_peaks.keys())
             all_peaks = {}
             for p in p1:
                 near_index = slope.find_nearest_index(p2, p)
@@ -213,14 +212,14 @@ class Data:
         # their valley points.
 
         # check 1: peak_amp_thresh
-        for pos in peaks.keys():
+        for pos in list(peaks.keys()):
             # pos is an index in x/y. DOES NOT refer to a cent value.
             if peaks[pos][0] < peak_amp_thresh:
                 peaks.pop(pos)
 
         # check 2, 3: valley_thresh, proportion of size of left and right lobes
         valleys = {}
-        for pos in peaks.keys():
+        for pos in list(peaks.keys()):
             # remember that peaks[pos][1] is left_index and
             # peaks[pos][2] is the right_index
             left_lobe = self.y[peaks[pos][1]:pos]
@@ -241,27 +240,27 @@ class Data:
                 valleys[pos + right_valley_pos] = right_lobe[right_valley_pos]
 
         if len(peaks) > 0:
-            peak_amps = np.array(peaks.values())
+            peak_amps = np.array(list(peaks.values()))
             peak_amps = peak_amps[:, 0]
             # hello again future me, it is given that you'll pause here
             # wondering why the heck we index x with peaks.keys() and
             # valleys.keys(). Just recall that pos refers to indices and
             # not value corresponding to the histogram bin. If i is pos,
             # x[i] is the bin value. Tada!!
-            self.peaks = {'peaks': [self.x[peaks.keys()], peak_amps], 'valleys': [self.x[valleys.keys()], valleys.values()]}
+            self.peaks = {'peaks': [self.x[list(peaks.keys())], peak_amps], 'valleys': [self.x[list(valleys.keys())], list(valleys.values())]}
         else:
             self.peaks = {'peaks': [[], []], 'valleys': [[], []]}
 
     def extend_peaks(self, prop_thresh=50):
-        """Each peak in the peaks of the object is checked for its presence in 
-        other octaves. If it does not exist, it is created. 
-        
-        prop_thresh is the cent range within which the peak in the other octave 
-        is expected to be present, i.e., only if there is a peak within this 
+        """Each peak in the peaks of the object is checked for its presence in
+        other octaves. If it does not exist, it is created.
+
+        prop_thresh is the cent range within which the peak in the other octave
+        is expected to be present, i.e., only if there is a peak within this
         cent range in other octaves, then the peak is considered to be present
         in that octave.
 
-        Note that this does not change the peaks of the object. It just returns 
+        Note that this does not change the peaks of the object. It just returns
         the extended peaks.
         """
 

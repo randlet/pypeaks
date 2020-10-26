@@ -1,6 +1,2 @@
-from data import Data
-from intervals import Intervals
-
-#del data
-#del intervals
-#del slope
+from pypeaks.data import Data
+from pypeaks.intervals import Intervals
